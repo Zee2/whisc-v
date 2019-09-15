@@ -12,7 +12,7 @@ For developing/testing on x86 or other desktop platforms, `gcc` is recommended f
 ```
 ./assemble.sh my_test_asm.S
 ```
-A stripped machine code binary called `test_binary` should be generated. Run the top-level simulator test harness with
+A stripped machine code binary called `test_binary` should be generated. Compile the Whisc-V virtual machine with `make whiscv` and run the top-level simulator test harness with
 ```
 ./whiscv test_binary
 ```
