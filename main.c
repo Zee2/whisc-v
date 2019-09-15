@@ -33,9 +33,16 @@ int main(int argc, char** argv){
     }
 
     uint16_t current_instruction;
-    fread(&current_instruction, 2, 1, binary_file);
 
-    printf("Instruction: %x", current_instruction);
+
+    while(1){
+        int count = fread(&current_instruction, 2, 1, binary_file);
+        if(count == 0){ break; }
+        printf("Instruction: ");
+        printf("%x", current_instruction >> 8);
+        printf("%x\n", current_instruction & 0xFF);
+    }
+    
 
     fclose(binary_file);
 
