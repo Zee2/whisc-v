@@ -14,6 +14,101 @@
 #define OP_C0_SW (0x6)
 
 
+//***************************************//
+//             RV32I Metadata            //
+//***************************************//
+
+// Various 7-bit opcodes for RV32I
+typedef enum opcode_rv32i_t
+{
+    OP_LUI = (0b0110111),
+    OP_AUIPC = (0b0010111),
+    OP_JAL = (0b1101111),
+    OP_JALR = (0b1101011),
+    OP_BR = (0b1100011),
+    OP_LD = (0b0000011),
+    OP_ST = (0b0100011),
+    OP_IMM = (0b0010011),
+    OP_REG = (0b0110011)
+} opcode_rv32i_t;
+
+// Instruction layout types for RV32I
+typedef enum r_types_rv32i_t{
+    r_type,
+    i_type,
+    s_type,
+    b_type,
+    u_type,
+    j_type
+} ins_types_rv32i_t;
+
+// R-type RV32i instruction
+typedef struct r_type_rv32i_t {
+    uint8_t rd;
+    uint8_t funct3;
+    uint8_t rs1;
+    uint8_t rs2;
+    uint8_t funct7;
+} r_type_rv32i_t;
+
+// I-type RV32i instruction, for immediate math and loading
+typedef struct i_type_rv32i_t {
+    uint8_t rd;
+    uint8_t funct3;
+    uint8_t rs1;
+    uint16_t imm11_0;
+} i_type_rv32i_t;
+
+// S-type RV32i instruction, mostly for storing
+typedef struct s_type_rv32i_t {
+    uint8_t imm4_0;
+    uint8_t funct3;
+    uint8_t rs1;
+    uint8_t rs2;
+    uint8_t imm11_5;
+} s_type_rv32i_t;
+
+// B-type RV32i instruction, mostly for branching
+typedef struct b_type_rv32i_t {
+    uint8_t imm4_1_11;
+    uint8_t funct3;
+    uint8_t rs1;
+    uint8_t rs2;
+    uint8_t imm12_10_5;
+} b_type_rv32i_t;
+
+// U-type RV32i instruction, for the LUI/AUIPC instructions
+typedef struct u_type_rv32i_t {
+    uint8_t rd;
+    uint32_t imm13_12;
+} u_type_rv32i_t;
+
+// J-type RV32i instruction, for the LUI/AUIPC instructions
+typedef struct j_type_rv32i_t {
+    uint8_t rd;
+    uint32_t imm_tangled;
+} j_type_rv32i_t;
+
+// The overall instruction data for RV32I
+typedef struct instruction_rv32i_t {
+    ins_types_rv32i_t ins_type;
+    opcode_rv32i_t opcode;
+    union {
+        r_type_rv32i_t r_data;
+        i_type_rv32i_t i_data;
+        s_type_rv32i_t s_data;
+        b_type_rv32i_t b_data;
+        u_type_rv32i_t u_data;
+        j_type_rv32i_t j_data;
+    } ins_data;
+} instruction_rv32i_t;
+
+
+//**************************************//
+//             RV32C Below              //
+//**************************************//
+
+
 // Identifying features of a WHISC-V opcode
 typedef struct opcode_rvc_t
 {
