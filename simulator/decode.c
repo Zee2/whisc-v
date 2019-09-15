@@ -2,9 +2,56 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include "opcodes.h"
 #include "decode.h"
 #include "simulator.h"
+#include "detangle.h"
+
+int decode_rv32i(uint32_t instruction_word, instruction_rv32i_t* dest){
+    if(dest == NULL){
+        return -1;
+    }
+
+    uint8_t opcode_bits = instruction_word & (0x7F);
+    if(opcode_bits != OP_LUI &&
+       opcode_bits != OP_AUIPC &&
+       opcode_bits != OP_JAL &&
+       opcode_bits != OP_JALR &&
+       opcode_bits != OP_BR &&
+       opcode_bits != OP_LD &&
+       opcode_bits != OP_ST &&
+       opcode_bits != OP_IMM &&
+       opcode_bits != OP_REG) {
+
+        // Invalid opcode, or not supported yet
+        fprintf(stderr, "Invalid opcode\n");
+        return -1;
+    }
+    switch (opcode_bits)
+    {
+    case OP_LUI:
+    case OP_AUIPC:
+        dest->opcode = (opcode_rv32i_t)opcode_bits;
+        dest->ins_type = u_type;
+        dest->u_data.rd = (instruction_word >> 7) & 0x7;
+        dest->u_data.imm32 = detangle_rv32i(instruction_word, u_type);
+        break;
+    case OP_JAL:
+        dest->opcode = OP_JAL;
+        dest->ins_type = j_type;
+        break;
+    
+    default:
+        break;
+    }
+    
+    return 0;
+
+    
+}
+
+
 
 int decode_compressed(uint16_t instruction_word, unpacked_rvc_t* dest){
     if(dest == NULL){

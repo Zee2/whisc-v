@@ -56,37 +56,35 @@ typedef struct i_type_rv32i_t {
     uint8_t rd;
     uint8_t funct3;
     uint8_t rs1;
-    uint16_t imm11_0;
+    uint16_t imm12;
 } i_type_rv32i_t;
 
 // S-type RV32i instruction, mostly for storing
 typedef struct s_type_rv32i_t {
-    uint8_t imm4_0;
     uint8_t funct3;
     uint8_t rs1;
     uint8_t rs2;
-    uint8_t imm11_5;
+    uint16_t imm12;
 } s_type_rv32i_t;
 
 // B-type RV32i instruction, mostly for branching
 typedef struct b_type_rv32i_t {
-    uint8_t imm4_1_11;
     uint8_t funct3;
     uint8_t rs1;
     uint8_t rs2;
-    uint8_t imm12_10_5;
+    uint16_t imm13;
 } b_type_rv32i_t;
 
 // U-type RV32i instruction, for the LUI/AUIPC instructions
 typedef struct u_type_rv32i_t {
     uint8_t rd;
-    uint32_t imm13_12;
+    uint32_t imm32;
 } u_type_rv32i_t;
 
-// J-type RV32i instruction, for the LUI/AUIPC instructions
+// J-type RV32i instruction, for the JAL instruction
 typedef struct j_type_rv32i_t {
     uint8_t rd;
-    uint32_t imm_tangled;
+    uint32_t imm21;
 } j_type_rv32i_t;
 
 // The overall instruction data for RV32I
@@ -100,7 +98,7 @@ typedef struct instruction_rv32i_t {
         b_type_rv32i_t b_data;
         u_type_rv32i_t u_data;
         j_type_rv32i_t j_data;
-    } ins_data;
+    };
 } instruction_rv32i_t;
 
 
