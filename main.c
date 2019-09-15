@@ -4,6 +4,9 @@
 #include "simulator/simulator.h"
 #include "simulator/opcodes.h"
 #include "simulator/decode.h"
+#include "simulator/core.h"
+
+uint32_t program_data[1024];
 
 int main(int argc, char** argv){
 
@@ -12,14 +15,8 @@ int main(int argc, char** argv){
         return -1;
     }
 
-    CB_type_t cb_var;
-
-    cb_var.offset3 = 4;
-
     char* filename = argv[1];
     FILE* binary_file;
-
-    printf("Hello!\n");
 
     // Open the provided file
     binary_file = fopen(filename, "rb");
@@ -29,23 +26,36 @@ int main(int argc, char** argv){
         return -1;
     }
 
-    uint16_t current_instruction;
 
+    core_state_t processor_state;
+    for(int i = 0; i < REGFILE_SIZE; i++){
+        processor_state.regfile[i] = i;
+    }
+    processor_state.pc_reg = 0;
 
-    while(1){
-        int count = fread(&current_instruction, 4, 1, binary_file);
-        if(count == 0){ break; }
-        
-        printf("%2x", (current_instruction >> 24) & 0xFF);
-        printf("%2x", (current_instruction >> 16) & 0xFF);
-        printf("%2x", (current_instruction >> 8) & 0xFF);
-        printf("%2x : ", (current_instruction >> 0) & 0xFF);
-        instruction_rv32i_t instruction;
-        if(decode_rv32i(current_instruction, &instruction) < 0){
+    uint32_t current_instruction;
+
+    
+    fread(&program_data, 4, 32, binary_file);
+
+    for(int j = 0; j < 8; j++){
+            printf("  x%d: %d", j, processor_state.regfile[j]);
+
+            if(j % 2 != 0 && j != 0) printf("\n");
+        }
+
+    for(int i = 0; i < 12; i++){
+        int result = execute_rv32i(program_data, &processor_state, &processor_state);
+
+        if(result != 0){
             printf("Error!\n");
-            continue;
-        } else {
-            pretty_print_rv32i(instruction);
+            break;
+        }
+
+        for(int j = 0; j < 8; j++){
+            printf("  x%d: %d", j, processor_state.regfile[j]);
+
+            if(j % 2 != 0 && j != 0) printf("\n");
         }
         
 

@@ -28,8 +28,8 @@ typedef enum opcode_rv32i_t
     OP_BR = (0b1100011),
     OP_LD = (0b0000011),
     OP_ST = (0b0100011),
-    OP_IMM = (0b0010011),
-    OP_REG = (0b0110011)
+    OP_IMM = (0x13),
+    OP_REG = (0x33)
 } opcode_rv32i_t;
 
 // RV32i branch funct3 codes

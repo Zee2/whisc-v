@@ -19,7 +19,9 @@ int decode_rv32i(uint32_t instruction_word, instruction_rv32i_t* dest){
     }
 
     uint8_t opcode_bits = instruction_word & (0x7F);
-    
+    //printf("Opcode: 0x%02x - ", opcode_bits);
+
+
     switch (opcode_bits)
     {
     case OP_LUI:
@@ -42,12 +44,14 @@ int decode_rv32i(uint32_t instruction_word, instruction_rv32i_t* dest){
         dest->i_data.rd = GET_RD(instruction_word);
         break;
     case OP_BR:
+        dest->opcode = OP_BR;
         dest->ins_type = b_type;
         dest->b_data.funct3 = GET_FUNCT3(instruction_word);
         dest->b_data.imm13 = detangle_rv32i(instruction_word, b_type);
         dest->b_data.rs1 = GET_RS1(instruction_word);
         break;
     case OP_LD:
+        dest->opcode = OP_LD;
         dest->ins_type = i_type;
         dest->i_data.funct3 = GET_FUNCT3(instruction_word);
         dest->i_data.imm12 = detangle_rv32i(instruction_word, i_type);
@@ -55,6 +59,7 @@ int decode_rv32i(uint32_t instruction_word, instruction_rv32i_t* dest){
         dest->i_data.rd = GET_RD(instruction_word);
         break;
     case OP_ST:
+        dest->opcode = OP_ST;
         dest->ins_type = s_type;
         dest->s_data.funct3 = GET_FUNCT3(instruction_word);
         dest->s_data.rs1 = GET_RS1(instruction_word);
@@ -62,13 +67,16 @@ int decode_rv32i(uint32_t instruction_word, instruction_rv32i_t* dest){
         dest->s_data.imm12 = detangle_rv32i(instruction_word, s_type);
         break;
     case OP_IMM:
+        dest->opcode = OP_IMM;
         dest->ins_type = i_type;
         dest->i_data.imm12 = detangle_rv32i(instruction_word, i_type);
         dest->i_data.rs1 = GET_RS1(instruction_word);
         dest->i_data.rd = GET_RD(instruction_word);
         break;
     case OP_REG:
+        dest->opcode = OP_REG;
         dest->ins_type = r_type;
+        dest->r_data.rd = GET_RD(instruction_word);
         dest->r_data.rs1 = GET_RS1(instruction_word);
         dest->r_data.rs2 = GET_RS2(instruction_word);
         dest->r_data.funct3 = GET_FUNCT3(instruction_word);
@@ -112,7 +120,7 @@ int pretty_print_rv32i(instruction_rv32i_t ins){
         printf("reg ");
         break;
     default:
-        fprintf(stderr, "Invalid or unsupported opcode!");
+        //fprintf(stderr, "Invalid or unsupported opcode!");
         return -1;
     }
     return 0;
