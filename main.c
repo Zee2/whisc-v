@@ -3,6 +3,7 @@
 #include <fcntl.h>
 #include "simulator/simulator.h"
 #include "simulator/opcodes.h"
+#include "simulator/decode.h"
 
 int main(int argc, char** argv){
 
@@ -20,10 +21,6 @@ int main(int argc, char** argv){
 
     printf("Hello!\n");
 
-    //int result = decode_compressed();
-
-    printf("Hello!\n");
-
     // Open the provided file
     binary_file = fopen(filename, "rb");
 
@@ -36,11 +33,22 @@ int main(int argc, char** argv){
 
 
     while(1){
-        int count = fread(&current_instruction, 2, 1, binary_file);
+        int count = fread(&current_instruction, 4, 1, binary_file);
         if(count == 0){ break; }
-        printf("Instruction: ");
-        printf("%x", current_instruction >> 8);
-        printf("%x\n", current_instruction & 0xFF);
+        
+        printf("%2x", (current_instruction >> 24) & 0xFF);
+        printf("%2x", (current_instruction >> 16) & 0xFF);
+        printf("%2x", (current_instruction >> 8) & 0xFF);
+        printf("%2x : ", (current_instruction >> 0) & 0xFF);
+        instruction_rv32i_t instruction;
+        if(decode_rv32i(current_instruction, &instruction) < 0){
+            printf("Error!\n");
+            continue;
+        } else {
+            pretty_print_rv32i(instruction);
+        }
+        
+
     }
     
 

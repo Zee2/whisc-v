@@ -21,8 +21,8 @@
 // Various 7-bit opcodes for RV32I
 typedef enum opcode_rv32i_t
 {
-    OP_LUI = (0b0110111),
-    OP_AUIPC = (0b0010111),
+    OP_LUI = (0b0110111),   // U-type
+    OP_AUIPC = (0b0010111), // U-type
     OP_JAL = (0b1101111),
     OP_JALR = (0b1101011),
     OP_BR = (0b1100011),
@@ -31,6 +31,17 @@ typedef enum opcode_rv32i_t
     OP_IMM = (0b0010011),
     OP_REG = (0b0110011)
 } opcode_rv32i_t;
+
+// RV32i branch funct3 codes
+typedef enum branch_types_rv32i_t
+{
+    BR_BEQ =  0x0,
+    BR_BNE =  0x1,
+    BR_BLT =  0x4,
+    BR_BGE =  0x5,
+    BR_BLTU = 0x6,
+    BR_BGEU = 0x7
+} branch_types_rv32i_t;
 
 // Instruction layout types for RV32I
 typedef enum r_types_rv32i_t{
