@@ -13,6 +13,14 @@
 #define OP_C0_LW (0x2)
 #define OP_C0_SW (0x6)
 
+// Some truly horrendous bit hackery
+// to extract various bits and sign
+// extend arbitrary bit vectors
+// http://graphics.stanford.edu/~seander/bithacks.html#FixedSignExtend
+#define GET_MATH_BIT(x) ((x >> 30) & 0x1)
+#define GET_SIGN_BITMASK(b) (1U << ((b)-1))
+#define SIGN_EXTEND(x, b) (((x) ^ GET_SIGN_BITMASK(b)) - GET_SIGN_BITMASK(b))
+
 
 //***************************************//
 //             RV32I Metadata            //
@@ -42,6 +50,28 @@ typedef enum branch_types_rv32i_t
     BR_BLTU = 0x6,
     BR_BGEU = 0x7
 } branch_types_rv32i_t;
+
+// RV32i immediate arithmetic funct3 encoding
+typedef enum imm_arith_rv32i_t
+{
+    IMM_ADDI  = 0x0,
+    IMM_SLTI  = 0x2,
+    IMM_SLTIU = 0x3,
+    IMM_XORI  = 0x4,
+    IMM_ORI   = 0x6,
+    IMM_ANDI  = 0x7
+} imm_arith_rv32i_t;
+
+// RV32i load type funct3 encoding
+typedef enum load_type_rv32i_t
+{
+    LD_B             = 0x0,
+    LD_H             = 0x1,
+    LD_W             = 0x2,
+    LD_UNSIGNED_MASK = 0x4
+    // Used to extract the bit which determines
+    // whether it is a signed/unsigned load
+} load_type_rv32i_t;
 
 // Instruction layout types for RV32I
 typedef enum r_types_rv32i_t{
