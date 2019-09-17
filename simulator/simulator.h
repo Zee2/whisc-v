@@ -5,7 +5,7 @@
 
 #include <stdint.h>
 
-#define MEM_SIZE 1024
+#define MEM_SIZE 4096
 
 typedef struct memory_t {
     uint8_t data[MEM_SIZE];

@@ -21,6 +21,9 @@ int execute_imm_arith(uint32_t instruction_bits, i_type_rv32i_t data, uint32_t* 
 
 int execute_load(i_type_rv32i_t data, memory_t* memory, uint32_t* regfile);
 
+int execute_lui(u_type_rv32i_t data, uint32_t* regfile);
+
+int execute_auipc(u_type_rv32i_t data, uint32_t pc, uint32_t* regfile);
 
 // Fetches from memory, performs bounds check depending on "check"
 // Fetches "width" bytes, in little-endian order
@@ -55,7 +58,6 @@ int execute_rv32i(memory_t* memory, core_state_t* prev, core_state_t* next){
     // anyone trying to perform a VM escape
     uint32_t instruction_bits = fetch_width(memory, next->pc_reg, 4, DO_BOUNDS_CHECK);
 
-    next->pc_reg += 4;
 
      // We set r0 to zero before executing the next instruction.
      // In hardware, r0 is wired directly to 0x0, but performing
@@ -96,11 +98,17 @@ int execute_rv32i(memory_t* memory, core_state_t* prev, core_state_t* next){
                                 memory,
                                 next->regfile);
         break;
+    case OP_AUIPC:
+        exec_result = execute_auipc(decoded_ins.u_data, next->pc_reg, next->regfile);
+        break;
+    case OP_LUI:
+        exec_result = execute_lui(decoded_ins.u_data, next->regfile);
     default:
-        printf(" NOP \n");
+        printf(" UNSUPPORTED \n");
         break;
     }
     next->regfile[0] = 0;
+    next->pc_reg += 4;
     return exec_result;
 }
 
@@ -207,7 +215,7 @@ int execute_imm_arith(uint32_t instruction_bits, i_type_rv32i_t data, uint32_t* 
             printf("Illegal immediate funct3 code: %01x\n", data.funct3);
             break;
     }
-    printf(" - rd: x%d, rs1: x%d, imm: x%d\n", data.rd, data.rs1, SIGN_EXTEND(data.imm12, 12));
+    printf(" - rd: x%d, rs1: x%d, imm: x%04x\n", data.rd, data.rs1, SIGN_EXTEND(data.imm12, 12));
     return 0;
 }
 
@@ -218,10 +226,13 @@ int execute_load(i_type_rv32i_t data, memory_t* memory, uint32_t* regfile){
     
     uint32_t loaded_data;
 
+    
+
     // Mask the lower two bits just to get the load width
     switch (data.funct3 & LD_WIDTH_MASK) {
         // Load byte
         case LD_B:
+            printf("LB");
             // Fetch single byte from memory, request bounds check
             loaded_data = fetch_width(memory, addr, 1, DO_BOUNDS_CHECK);
 
@@ -235,6 +246,7 @@ int execute_load(i_type_rv32i_t data, memory_t* memory, uint32_t* regfile){
 
         // Load half
         case LD_H:
+            printf("LH");
             if(MEM_BOUNDS_CHECK(memory->mem_lower_bound, memory->mem_upper_bound, addr, 2)){
                 printf("Illegal memory access at %x", addr);
                 return -1; // Requested memory out of bounds
@@ -250,18 +262,34 @@ int execute_load(i_type_rv32i_t data, memory_t* memory, uint32_t* regfile){
 
         // Load word
         case LD_W:
+            printf("LW");
             if(MEM_BOUNDS_CHECK(memory->mem_lower_bound, memory->mem_upper_bound, addr, 2)){
                 printf("Illegal memory access at %x", addr);
                 return -1; // Requested memory out of bounds
             }
             // Fetch the four bytes from memory (little endian)
             regfile[data.rd] = fetch_width(memory, addr, 4, DO_BOUNDS_CHECK);
+            printf(" : addr = %08x, Fetch result: %08x ", addr, fetch_width(memory, addr, 4, DO_BOUNDS_CHECK));
             break;
         default:
             printf("Invalid load width encoding: %x", data.funct3 & LD_WIDTH_MASK);
             return -1;
     }
 
+    printf(" - rd: x%d, imm12: x%04x\n", data.rd, data.imm12);
+
     return 0;
     
+}
+
+int execute_lui(u_type_rv32i_t data, uint32_t* regfile) {
+    printf("LUI - rd: x%d, imm32: x%04x\n", data.rd, data.imm32);
+    regfile[data.rd] = data.imm32;
+    return 0;
+}
+
+int execute_auipc(u_type_rv32i_t data, uint32_t pc, uint32_t* regfile) {
+    printf("AUIPC - rd: x%d, imm32: x%04x, pc: x%04x\n", data.rd, data.imm32, pc);
+    regfile[data.rd] = data.imm32 + pc;
+    return 0;
 }

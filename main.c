@@ -35,8 +35,8 @@ int main(int argc, char** argv){
         processor_state.regfile[i] = i;
     }
     processor_state.pc_reg = 0;
-    
-    fread(&(main_memory.data), 1, 64, binary_file);
+
+    fread(&(main_memory.data), 1, MEM_SIZE, binary_file);
 
     for(int j = 0; j < 8; j++){
             printf("  x%d: %d", j, processor_state.regfile[j]);
@@ -52,7 +52,7 @@ int main(int argc, char** argv){
         }
 
         for(int j = 0; j < 8; j++){
-            printf("  x%d: %d", j, processor_state.regfile[j]);
+            printf("  x%d: %04x", j, processor_state.regfile[j]);
             if(j % 2 != 0 && j != 0) printf("\n");
         }
 
