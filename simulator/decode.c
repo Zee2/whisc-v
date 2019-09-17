@@ -69,6 +69,7 @@ int decode_rv32i(uint32_t instruction_word, instruction_rv32i_t* dest){
     case OP_IMM:
         dest->opcode = OP_IMM;
         dest->ins_type = i_type;
+        dest->i_data.funct3 = GET_FUNCT3(instruction_word);
         dest->i_data.imm12 = detangle_rv32i(instruction_word, i_type);
         dest->i_data.rs1 = GET_RS1(instruction_word);
         dest->i_data.rd = GET_RD(instruction_word);

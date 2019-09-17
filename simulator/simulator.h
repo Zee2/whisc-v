@@ -5,6 +5,13 @@
 
 #include <stdint.h>
 
+#define MEM_SIZE 1024
 
+typedef struct memory_t {
+    uint8_t data[MEM_SIZE];
+    uint32_t mem_lower_bound;
+    uint32_t mem_upper_bound;
+
+} memory_t;
 
 #endif

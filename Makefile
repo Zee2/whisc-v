@@ -36,7 +36,7 @@ LD := gcc
 TAR := tar
 
 # C flags
-CFLAGS := -std=c11
+CFLAGS := -std=c11 -Wall
 # linker flags
 LDFLAGS :=
 # flags required for dependency generation; passed to compilers

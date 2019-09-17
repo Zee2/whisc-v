@@ -1,9 +1,8 @@
 .section .text
 .globl _start
 _start:
-	add x1, x2, x3
-	add x1, x4, x5
-	add x1, x6, x7
+	addi x1, x0, 420
+	addi x1, x0, 69
 
 .section .data
 my_label:

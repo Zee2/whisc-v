@@ -68,6 +68,7 @@ typedef enum load_type_rv32i_t
     LD_B             = 0x0,
     LD_H             = 0x1,
     LD_W             = 0x2,
+    LD_WIDTH_MASK    = 0x3,
     LD_UNSIGNED_MASK = 0x4
     // Used to extract the bit which determines
     // whether it is a signed/unsigned load

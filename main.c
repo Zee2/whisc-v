@@ -6,7 +6,10 @@
 #include "simulator/decode.h"
 #include "simulator/core.h"
 
-uint32_t program_data[1024];
+memory_t main_memory = {
+    mem_lower_bound: 0,
+    mem_upper_bound: MEM_SIZE-1
+};
 
 int main(int argc, char** argv){
 
@@ -32,20 +35,16 @@ int main(int argc, char** argv){
         processor_state.regfile[i] = i;
     }
     processor_state.pc_reg = 0;
-
-    uint32_t current_instruction;
-
     
-    fread(&program_data, 4, 32, binary_file);
+    fread(&(main_memory.data), 1, 64, binary_file);
 
     for(int j = 0; j < 8; j++){
             printf("  x%d: %d", j, processor_state.regfile[j]);
-
             if(j % 2 != 0 && j != 0) printf("\n");
         }
 
     for(int i = 0; i < 12; i++){
-        int result = execute_rv32i(program_data, &processor_state, &processor_state);
+        int result = execute_rv32i(&main_memory, &processor_state, &processor_state);
 
         if(result != 0){
             printf("Error!\n");
@@ -54,9 +53,11 @@ int main(int argc, char** argv){
 
         for(int j = 0; j < 8; j++){
             printf("  x%d: %d", j, processor_state.regfile[j]);
-
             if(j % 2 != 0 && j != 0) printf("\n");
         }
+
+        printf("Press any key to continue\n");
+        getchar();
         
 
     }
