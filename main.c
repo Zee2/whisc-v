@@ -43,7 +43,7 @@ int main(int argc, char** argv){
             if(j % 2 != 0 && j != 0) printf("\n");
         }
 
-    for(int i = 0; i < 12; i++){
+    for(int i = 0; i < 1024; i++){
         int result = execute_rv32i(&main_memory, &processor_state, &processor_state);
 
         if(result != 0){

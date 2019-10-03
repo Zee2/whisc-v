@@ -21,9 +21,13 @@ int execute_imm_arith(uint32_t instruction_bits, i_type_rv32i_t data, uint32_t* 
 
 int execute_load(i_type_rv32i_t data, memory_t* memory, uint32_t* regfile);
 
+int execute_store(s_type_rv32i_t data, memory_t* memory, uint32_t* regfile);
+
 int execute_lui(u_type_rv32i_t data, uint32_t* regfile);
 
 int execute_auipc(u_type_rv32i_t data, uint32_t pc, uint32_t* regfile);
+
+int execute_branch(b_type_rv32i_t data, uint32_t* regfile, core_state_t* next_state);
 
 // Fetches from memory, performs bounds check depending on "check"
 // Fetches "width" bytes, in little-endian order
@@ -32,7 +36,7 @@ uint32_t fetch_width(memory_t* memory, uint32_t byte_addr, uint8_t width, uint8_
     if(check == DO_BOUNDS_CHECK){
         if(MEM_BOUNDS_CHECK(memory->mem_lower_bound, memory->mem_upper_bound, byte_addr, width)){
             printf("Out of bounds memory access at address: %04x, width = %d", byte_addr, width);
-            return 0xDEADBEEF; // addr out of bounds, helps prevent nasty VM escape loveliness :)
+            return 0xDEADC0DE; // addr out of bounds, helps prevent nasty VM escape loveliness :)
         }
     }
     uint32_t word = 0;
@@ -42,6 +46,23 @@ uint32_t fetch_width(memory_t* memory, uint32_t byte_addr, uint8_t width, uint8_
 
     return word;
     
+}
+
+// Stores to memory
+// Stores "width" bytes, in little-endian order
+// Performs no sign extension
+uint32_t store_width(memory_t* memory, uint32_t word, uint32_t byte_addr, uint8_t width, uint8_t check){
+    if(check == DO_BOUNDS_CHECK){
+        if(MEM_BOUNDS_CHECK(memory->mem_lower_bound, memory->mem_upper_bound, byte_addr, width)){
+            printf("Out of bounds memory access at address: %04x, width = %d", byte_addr, width);
+            return 0xDEADC0DE; // addr out of bounds, helps prevent nasty VM escape loveliness :)
+        }
+    }
+    //uint32_t word = 0;
+    for(int i = 0; i < width; i++){
+        memory->data[byte_addr + i] = (word >> (8*i)) & 0xFFFF;
+    }
+    return word;
 }
 
 
@@ -103,6 +124,10 @@ int execute_rv32i(memory_t* memory, core_state_t* prev, core_state_t* next){
         break;
     case OP_LUI:
         exec_result = execute_lui(decoded_ins.u_data, next->regfile);
+        break;
+    case OP_BR:
+        exec_result = execute_branch(decoded_ins.b_data, next->regfile, next);
+        break;
     default:
         printf(" UNSUPPORTED \n");
         break;
@@ -225,9 +250,6 @@ int execute_load(i_type_rv32i_t data, memory_t* memory, uint32_t* regfile){
     uint32_t addr = (uint32_t)regfile[data.rs1] + SIGN_EXTEND(data.imm12, 12);
     
     uint32_t loaded_data;
-
-    
-
     // Mask the lower two bits just to get the load width
     switch (data.funct3 & LD_WIDTH_MASK) {
         // Load byte
@@ -277,7 +299,18 @@ int execute_load(i_type_rv32i_t data, memory_t* memory, uint32_t* regfile){
     }
 
     printf(" - rd: x%d, imm12: x%04x\n", data.rd, data.imm12);
+    return 0;
+    
+}
 
+int execute_store(s_type_rv32i_t data, memory_t* memory, uint32_t* regfile){
+
+    // Sign extend 12-bit immediate, add to rs1 base address
+    uint32_t addr = (uint32_t)regfile[data.rs1] + SIGN_EXTEND(data.imm12, 12);
+    
+    uint32_t width = 1 << (data.funct3 & LD_WIDTH_MASK);
+    store_width(memory, regfile[data.rs2], addr, width, 1);
+    printf(" - rd: x%d, imm12: x%04x\n", data.imm12, data.imm12);
     return 0;
     
 }
@@ -291,5 +324,35 @@ int execute_lui(u_type_rv32i_t data, uint32_t* regfile) {
 int execute_auipc(u_type_rv32i_t data, uint32_t pc, uint32_t* regfile) {
     printf("AUIPC - rd: x%d, imm32: x%04x, pc: x%04x\n", data.rd, data.imm32, pc);
     regfile[data.rd] = data.imm32 + pc;
+    return 0;
+}
+
+int execute_branch(b_type_rv32i_t data, uint32_t* regfile, core_state_t* next_state) {
+    printf("BRANCH - rs2: x%d, rs1: x%d, imm: 0x%04x", data.rs2, data.rs1, data.imm13);
+    int should_branch = 0;
+    switch(data.funct3){
+        case BR_BEQ:
+            should_branch = regfile[data.rs1] == regfile[data.rs2];
+            break;
+        case BR_BNE:
+            should_branch = regfile[data.rs1] != regfile[data.rs2];
+            break;
+        case BR_BLT:
+            should_branch = (int32_t)regfile[data.rs1] < (int32_t)regfile[data.rs2];
+            break;
+        case BR_BGE:
+            should_branch = (int32_t)regfile[data.rs1] >= (int32_t)regfile[data.rs2];
+            break;
+        case BR_BLTU:
+            should_branch = regfile[data.rs1] < regfile[data.rs2];
+            break;
+        case BR_BGEU:
+            should_branch = regfile[data.rs1] >= regfile[data.rs2];
+            break;
+    }
+
+    if(should_branch){
+        next_state->pc_reg += SIGN_EXTEND(data.imm13, 13) - 4;
+    }
     return 0;
 }

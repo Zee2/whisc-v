@@ -49,6 +49,7 @@ int decode_rv32i(uint32_t instruction_word, instruction_rv32i_t* dest){
         dest->b_data.funct3 = GET_FUNCT3(instruction_word);
         dest->b_data.imm13 = detangle_rv32i(instruction_word, b_type);
         dest->b_data.rs1 = GET_RS1(instruction_word);
+        dest->b_data.rs2 = GET_RS2(instruction_word);
         break;
     case OP_LD:
         dest->opcode = OP_LD;

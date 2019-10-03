@@ -23,7 +23,7 @@ uint32_t detangle_rv32i(uint32_t word, ins_types_rv32i_t type) {
         {
             uint8_t bit_12 = (word >> 31) & 0x1;
             uint8_t bit_11 = (word >> 7) & 0x1;
-            uint8_t bit_10_5 = (word >> 30) & 0x3F;
+            uint8_t bit_10_5 = (word >> 25) & 0x3F;
             uint8_t bit_4_1 = (word >> 8) & 0x0F;
             return (bit_4_1 << 1) | (bit_10_5 << 5) | (bit_11 << 11) | (bit_12 << 12);
         }
