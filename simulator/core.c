@@ -29,6 +29,10 @@ int execute_auipc(u_type_rv32i_t data, uint32_t pc, uint32_t* regfile);
 
 int execute_branch(b_type_rv32i_t data, uint32_t* regfile, core_state_t* next_state);
 
+int execute_jal(j_type_rv32i_t data, uint32_t* regfile, core_state_t* next_state);
+
+int execute_jalr(i_type_rv32i_t data, uint32_t* regfile, core_state_t* next_state);
+
 // Fetches from memory, performs bounds check depending on "check"
 // Fetches "width" bytes, in little-endian order
 // Performs no sign extension
@@ -90,7 +94,7 @@ int execute_rv32i(memory_t* memory, core_state_t* prev, core_state_t* next){
      // effectively discarding the x0 result of this execution.
     next->regfile[0] = 0;
 
-    printf("Full instruction: %08x:  ", instruction_bits);
+    printf("Addr: %08x, Full instruction: %08x:  ", next->pc_reg, instruction_bits);
 
     // Decode the instruction
     instruction_rv32i_t decoded_ins;
@@ -128,8 +132,14 @@ int execute_rv32i(memory_t* memory, core_state_t* prev, core_state_t* next){
     case OP_BR:
         exec_result = execute_branch(decoded_ins.b_data, next->regfile, next);
         break;
+    case OP_JAL:
+        exec_result = execute_jal(decoded_ins.j_data, next->regfile, next);
+        break;
+    case OP_JALR:
+        exec_result = execute_jalr(decoded_ins.i_data, next->regfile, next);
+        break;
     default:
-        printf(" UNSUPPORTED \n");
+        printf(" UNSUPPORTED: opcode 0x%x \n", decoded_ins.opcode);
         break;
     }
     next->regfile[0] = 0;
@@ -328,7 +338,7 @@ int execute_auipc(u_type_rv32i_t data, uint32_t pc, uint32_t* regfile) {
 }
 
 int execute_branch(b_type_rv32i_t data, uint32_t* regfile, core_state_t* next_state) {
-    printf("BRANCH - rs2: x%d, rs1: x%d, imm: 0x%04x", data.rs2, data.rs1, data.imm13);
+    printf("BRANCH - rs2: x%d, rs1: x%d, imm: 0x%04x\n", data.rs2, data.rs1, data.imm13);
     int should_branch = 0;
     switch(data.funct3){
         case BR_BEQ:
@@ -354,5 +364,23 @@ int execute_branch(b_type_rv32i_t data, uint32_t* regfile, core_state_t* next_st
     if(should_branch){
         next_state->pc_reg += SIGN_EXTEND(data.imm13, 13) - 4;
     }
+    return 0;
+}
+
+int execute_jal(j_type_rv32i_t data, uint32_t* regfile, core_state_t* next_state) {
+    printf("JAL - rd: x%d, imm: 0x%04x\n", data.rd, data.imm21);
+
+    regfile[data.rd] = next_state->pc_reg + 4;
+    next_state->pc_reg += SIGN_EXTEND(data.imm21, 21) - 4;
+
+    return 0;
+}
+
+int execute_jalr(i_type_rv32i_t data, uint32_t* regfile, core_state_t* next_state) {
+    printf("JALR - rd: x%d, rs1: %d, imm: 0x%04x\n", data.rd, data.rs1, data.imm12);
+
+    regfile[data.rd] = next_state->pc_reg + 4;
+    next_state->pc_reg = ((SIGN_EXTEND(data.imm12, 12) + regfile[data.rs1]) & ~0x1) - 4;
+
     return 0;
 }

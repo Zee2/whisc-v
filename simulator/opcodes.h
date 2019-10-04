@@ -32,7 +32,7 @@ typedef enum opcode_rv32i_t
     OP_LUI = (0b0110111),   // U-type
     OP_AUIPC = (0x17), // U-type
     OP_JAL = (0b1101111),
-    OP_JALR = (0b1101011),
+    OP_JALR = (0b1100111),
     OP_BR = (0b1100011),
     OP_LD = (0x3),
     OP_ST = (0b0100011),

@@ -34,6 +34,7 @@ int decode_rv32i(uint32_t instruction_word, instruction_rv32i_t* dest){
     case OP_JAL:
         dest->opcode = OP_JAL;
         dest->ins_type = j_type;
+        dest->j_data.rd = GET_RD(instruction_word);
         dest->j_data.imm21 = detangle_rv32i(instruction_word, j_type);
         break;
     case OP_JALR:
@@ -96,27 +97,27 @@ int pretty_print_rv32i(instruction_rv32i_t ins){
     switch (ins.opcode)
     {
     case OP_LUI:
-        printf("lui ");
+        printf("LUI ");
     case OP_AUIPC:
-        printf("auipc ");
+        printf("AUIPC ");
         break;
     case OP_JAL:
-        printf("jal ");
+        printf("JAL ");
         break;
     case OP_JALR:
-        printf("jalr ");
+        printf("JALR ");
         break;
     case OP_BR:
-        printf("br ");
+        printf("BR ");
         break;
     case OP_LD:
-        printf("ld ");
+        printf("LD ");
         break;
     case OP_ST:
-        printf("st ");
+        printf("ST ");
         break;
     case OP_IMM:
-        printf("imm ");
+        printf("IMM ");
         break;
     case OP_REG:
         printf("reg ");
