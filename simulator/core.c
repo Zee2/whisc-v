@@ -94,13 +94,16 @@ int execute_rv32i(memory_t* memory, core_state_t* prev, core_state_t* next){
      // effectively discarding the x0 result of this execution.
     next->regfile[0] = 0;
 
-    printf("Addr: %08x, Full instruction: %08x:  ", next->pc_reg, instruction_bits);
+    printf("Addr: %08x, Full instruction: %08x:  \n", next->pc_reg, instruction_bits);
 
     // Decode the instruction
     instruction_rv32i_t decoded_ins;
     decode_rv32i(instruction_bits, &decoded_ins);
-
-    printf("Opcode: 0x%02x - ", decoded_ins.opcode);
+    
+    char printme[128];
+    pretty_print_rv32i(decoded_ins, printme);
+    printme[127] = "\0";
+    printf("Pretty-print: %s\n", printme);
 
     // Each exec function will write to this as the return value
     int exec_result = 0; 
@@ -120,6 +123,11 @@ int execute_rv32i(memory_t* memory, core_state_t* prev, core_state_t* next){
         break;
     case OP_LD:
         exec_result = execute_load(decoded_ins.i_data,
+                                memory,
+                                next->regfile);
+        break;
+    case OP_ST:
+        exec_result = execute_store(decoded_ins.s_data,
                                 memory,
                                 next->regfile);
         break;

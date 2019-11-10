@@ -3,12 +3,13 @@
 
 
 _start:
-	jal x1, my_func
 	addi x6, x5, 5
-	beq x0, x0, _start
-my_func:
-	addi x5, x5, 5
-	ret
-my_label:
-	.word 0xDEADBEEF
+	sb x3, 4(x6)
+	blt x4, x6, _target
+	nop
+_target: 
+	nop
+	nop
+	nop
+	nop
 

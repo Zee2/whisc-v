@@ -45,6 +45,7 @@ int main(int argc, char** argv){
 
     for(int i = 0; i < 1024; i++){
         int result = execute_rv32i(&main_memory, &processor_state, &processor_state);
+        
 
         if(result != 0){
             printf("Error!\n");

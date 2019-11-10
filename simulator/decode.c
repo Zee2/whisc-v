@@ -93,31 +93,100 @@ int decode_rv32i(uint32_t instruction_word, instruction_rv32i_t* dest){
     return 0;
 }
 
-int pretty_print_rv32i(instruction_rv32i_t ins){
+int pretty_print_rv32i(instruction_rv32i_t ins, char* output){
+
+    int charcount = 0;
+    char branch_code[5];
+
     switch (ins.opcode)
     {
     case OP_LUI:
-        printf("LUI ");
+        charcount += snprintf(output, 100, "LUI x%d, 0x%X", ins.u_data.rd, ins.u_data.imm32 >> 12);
+        break;
     case OP_AUIPC:
-        printf("AUIPC ");
+        charcount += snprintf(output, 100, "AUIPC x%d, 0x%X", ins.u_data.rd, ins.u_data.imm32 >> 12);
         break;
     case OP_JAL:
-        printf("JAL ");
+        charcount += snprintf(output, 100, "JAL x%d, 0x%X", ins.j_data.rd, ins.j_data.imm21);
         break;
     case OP_JALR:
-        printf("JALR ");
+        charcount += snprintf(output, 100, "JALR x%d, 0x%X(x%d)", ins.i_data.rd, ins.i_data.imm12, ins.i_data.rs1);
         break;
     case OP_BR:
-        printf("BR ");
+        switch(ins.b_data.funct3){
+            case BR_BEQ:
+                charcount += snprintf(output, 100, "BEQ x%d, x%d, 0x%X", ins.b_data.rs1, ins.b_data.rs2, ins.b_data.imm13);
+                break;
+            case BR_BNE:
+                charcount += snprintf(output, 100, "BNE x%d, x%d, 0x%X", ins.b_data.rs1, ins.b_data.rs2, ins.b_data.imm13);
+                break;
+            case BR_BLT:
+                charcount += snprintf(output, 100, "BLT x%d, x%d, 0x%X", ins.b_data.rs1, ins.b_data.rs2, ins.b_data.imm13);
+                break;
+            case BR_BGE:
+                charcount += snprintf(output, 100, "BGE x%d, x%d, 0x%X", ins.b_data.rs1, ins.b_data.rs2, ins.b_data.imm13);
+                break;
+            case BR_BLTU:
+                charcount += snprintf(output, 100, "BLTU x%d, x%d, 0x%X", ins.b_data.rs1, ins.b_data.rs2, ins.b_data.imm13);
+                break;
+            case BR_BGEU:
+                charcount += snprintf(output, 100, "BGEU x%d, x%d, 0x%X", ins.b_data.rs1, ins.b_data.rs2, ins.b_data.imm13);
+                break;
+        }
         break;
     case OP_LD:
-        printf("LD ");
+        switch(LD_WIDTH_MASK & ins.i_data.funct3){
+            case LD_B:
+                if(LD_UNSIGNED_MASK & ins.i_data.funct3)
+                    charcount += snprintf(output, 100, "LBU x%d, 0x%X(x%d)", ins.i_data.rd, ins.i_data.imm12, ins.i_data.rs1);
+                else
+                    charcount += snprintf(output, 100, "LB x%d, 0x%X(x%d)", ins.i_data.rd, ins.i_data.imm12, ins.i_data.rs1);
+                break;
+            case LD_H:
+                if(LD_UNSIGNED_MASK & ins.i_data.funct3)
+                    charcount += snprintf(output, 100, "LHU x%d, 0x%X(x%d)", ins.i_data.rd, ins.i_data.imm12, ins.i_data.rs1);
+                else
+                    charcount += snprintf(output, 100, "LH x%d, 0x%X(x%d)", ins.i_data.rd, ins.i_data.imm12, ins.i_data.rs1);
+                break;
+            case LD_W:
+                charcount += snprintf(output, 100, "LW x%d, 0x%X(x%d)", ins.i_data.rd, ins.i_data.imm12, ins.i_data.rs1);
+                break;
+        }
         break;
     case OP_ST:
-        printf("ST ");
+        switch(LD_WIDTH_MASK & ins.s_data.funct3){
+            case LD_B:
+                charcount += snprintf(output, 100, "SB x%d, 0x%X(x%d)", ins.s_data.rs2, ins.s_data.imm12, ins.s_data.rs1);
+                break;
+            case LD_H:
+                charcount += snprintf(output, 100, "SH x%d, 0x%X(x%d)", ins.s_data.rs2, ins.s_data.imm12, ins.s_data.rs1);
+                break;
+            case LD_W:
+                charcount += snprintf(output, 100, "SW x%d, 0x%X(x%d)", ins.s_data.rs2, ins.s_data.imm12, ins.s_data.rs1);
+                break;
+        }
         break;
     case OP_IMM:
-        printf("IMM ");
+        switch(ins.i_data.funct3){
+            case IMM_ADDI:
+                charcount += snprintf(output, 100, "ADDI x%d, x%d, 0x%X", ins.i_data.rd, ins.i_data.rs1, ins.i_data.imm12);
+                break;
+            case IMM_SLTI:
+                charcount += snprintf(output, 100, "SLTI x%d, x%d, 0x%X", ins.i_data.rd, ins.i_data.rs1, ins.i_data.imm12);
+                break;
+            case IMM_SLTIU:
+                charcount += snprintf(output, 100, "SLTIU x%d, x%d, 0x%X", ins.i_data.rd, ins.i_data.rs1, ins.i_data.imm12);
+                break;
+            case IMM_XORI:
+                charcount += snprintf(output, 100, "XORI x%d, x%d, 0x%X", ins.i_data.rd, ins.i_data.rs1, ins.i_data.imm12);
+                break;
+            case IMM_ORI:
+                charcount += snprintf(output, 100, "ORI x%d, x%d, 0x%X", ins.i_data.rd, ins.i_data.rs1, ins.i_data.imm12);
+                break;
+            case IMM_ANDI:
+                charcount += snprintf(output, 100, "ANDI x%d, x%d, 0x%X", ins.i_data.rd, ins.i_data.rs1, ins.i_data.imm12);
+                break;
+        }
         break;
     case OP_REG:
         printf("reg ");
@@ -126,7 +195,7 @@ int pretty_print_rv32i(instruction_rv32i_t ins){
         //fprintf(stderr, "Invalid or unsupported opcode!");
         return -1;
     }
-    return 0;
+    return charcount;
 }
 
 
