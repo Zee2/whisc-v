@@ -193,9 +193,9 @@ int pretty_print_rv32i(instruction_rv32i_t ins, char* output){
         switch(ins.r_data.funct3){
             case RR_ADDSUB:
                 if(ins.r_data.math_bit)
-                    charcount += snprintf(output, 100, "ADD x%d, x%d, x%d", ins.r_data.rd, ins.r_data.rs1, ins.r_data.rs2);
-                else
                     charcount += snprintf(output, 100, "SUB x%d, x%d, x%d", ins.r_data.rd, ins.r_data.rs1, ins.r_data.rs2);
+                else
+                    charcount += snprintf(output, 100, "ADD x%d, x%d, x%d", ins.r_data.rd, ins.r_data.rs1, ins.r_data.rs2);
                 break;
             case RR_SLL:
                 charcount += snprintf(output, 100, "SUB x%d, x%d, x%d", ins.r_data.rd, ins.r_data.rs1, ins.r_data.rs2);
