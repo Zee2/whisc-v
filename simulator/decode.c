@@ -84,6 +84,7 @@ int decode_rv32i(uint32_t instruction_word, instruction_rv32i_t* dest){
         dest->r_data.rs2 = GET_RS2(instruction_word);
         dest->r_data.funct3 = GET_FUNCT3(instruction_word);
         dest->r_data.funct7 = (instruction_word >> 25) & 0x7F;
+        dest->r_data.math_bit = GET_MATH_BIT(instruction_word);
         break;
     default:
         //fprintf(stderr, "Invalid or unsupported opcode!");
@@ -189,11 +190,42 @@ int pretty_print_rv32i(instruction_rv32i_t ins, char* output){
         }
         break;
     case OP_REG:
-        printf("reg ");
+        switch(ins.r_data.funct3){
+            case RR_ADDSUB:
+                if(ins.r_data.math_bit)
+                    charcount += snprintf(output, 100, "ADD x%d, x%d, x%d", ins.r_data.rd, ins.r_data.rs1, ins.r_data.rs2);
+                else
+                    charcount += snprintf(output, 100, "SUB x%d, x%d, x%d", ins.r_data.rd, ins.r_data.rs1, ins.r_data.rs2);
+                break;
+            case RR_SLL:
+                charcount += snprintf(output, 100, "SUB x%d, x%d, x%d", ins.r_data.rd, ins.r_data.rs1, ins.r_data.rs2);
+                break;
+            case RR_SLT:
+                charcount += snprintf(output, 100, "SUB x%d, x%d, x%d", ins.r_data.rd, ins.r_data.rs1, ins.r_data.rs2);
+                break;
+            case RR_SLTU:
+                charcount += snprintf(output, 100, "SUB x%d, x%d, x%d", ins.r_data.rd, ins.r_data.rs1, ins.r_data.rs2);
+                break;
+            case RR_XOR:
+                charcount += snprintf(output, 100, "SUB x%d, x%d, x%d", ins.r_data.rd, ins.r_data.rs1, ins.r_data.rs2);
+                break;
+            case RR_SR:
+                if(ins.r_data.math_bit)
+                    charcount += snprintf(output, 100, "SRA x%d, x%d, x%d", ins.r_data.rd, ins.r_data.rs1, ins.r_data.rs2);
+                else
+                    charcount += snprintf(output, 100, "SRL x%d, x%d, x%d", ins.r_data.rd, ins.r_data.rs1, ins.r_data.rs2);
+                break;
+            case RR_OR:
+                charcount += snprintf(output, 100, "SUB x%d, x%d, x%d", ins.r_data.rd, ins.r_data.rs1, ins.r_data.rs2);
+                break;
+            case RR_AND:
+                charcount += snprintf(output, 100, "SUB x%d, x%d, x%d", ins.r_data.rd, ins.r_data.rs1, ins.r_data.rs2);
+                break;
+        }
         break;
-    default:
-        //fprintf(stderr, "Invalid or unsupported opcode!");
-        return -1;
+    }
+    if(charcount == 0){
+        charcount += snprintf(output, 100, "Invalid");
     }
     return charcount;
 }

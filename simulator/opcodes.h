@@ -62,6 +62,19 @@ typedef enum imm_arith_rv32i_t
     IMM_ANDI  = 0x7
 } imm_arith_rv32i_t;
 
+// RV32i reg-reg arithmetic funct3 encoding
+typedef enum regreg_arith_rv32i_t
+{
+    RR_ADDSUB = 0x0,
+    RR_SLL    = 0x1,
+    RR_SLT    = 0x2,
+    RR_SLTU   = 0x3,
+    RR_XOR    = 0x4,
+    RR_SR     = 0x5,
+    RR_OR     = 0x6,
+    RR_AND    = 0x7
+} regreg_arith_rv32i_t;
+
 // RV32i load type funct3 encoding
 typedef enum load_type_rv32i_t
 {
@@ -91,6 +104,7 @@ typedef struct r_type_rv32i_t {
     uint8_t rs1;
     uint8_t rs2;
     uint8_t funct7;
+    uint8_t math_bit;
 } r_type_rv32i_t;
 
 // I-type RV32i instruction, for immediate math and loading
