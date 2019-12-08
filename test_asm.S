@@ -3,16 +3,8 @@
 
 
 _start:
-	addi x6, x5, 5
-	add x1, x2, x3
-	sra x5, x2, x4
-	srl x1, x2, x3
-	sb x3, 4(x6)
-	blt x4, x6, _target
-	nop
-_target: 
-	nop
-	nop
-	nop
-	nop
+	addi x1, x1, 1
+	addi x2, x2, 2
+	addi x3, x3, 3
+	bez x0, _start
 
